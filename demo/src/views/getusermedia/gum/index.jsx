@@ -6,7 +6,7 @@ export default class Gum extends Component {
         msg: null,
     }
     constraints = window.constraints = {
-        audio: false,
+        audio: true,
         video: true
       };
     
