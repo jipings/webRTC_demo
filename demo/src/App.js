@@ -5,12 +5,16 @@ import Canvas from './views/getusermedia/canvas';
 import Filter from './views/getusermedia/filter';
 import GetDisplayMedia from './views/getusermedia/getdisplaymedia';
 import Record from './views/getusermedia/record';
+import Audio from './views/getusermedia/audio';
+import Volume from './views/getusermedia/volume';
 class App extends Component {
   render() {
     return (
       <div className="App">
       <HashRouter>
         <Switch>
+          <Route exact path="/getusermedia/volume" render={() => <Volume />} />
+          <Route exact path="/getusermedia/audio" render={() => <Audio />} />
           <Route exact path="/getusermedia/gum" render={() => <Gum />} />
           <Route exact path="/getusermedia/canvas" render={() => <Canvas />} />
           <Route exact path="/getusermedia/filter" render={() => <Filter />} />
