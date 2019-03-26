@@ -1,0 +1,18 @@
+
+canvas {
+    background-color: #ccc;
+    --width: calc(45%);
+    width: var(--width);
+    height: calc(var(--width) * 0.75);
+    margin: 1em;
+    vertical-align: top;
+  }
+  
+  video {
+    --width: calc(45%);
+    width: var(--width);
+    height: calc(var(--width) * 0.75);
+    margin: 1em;
+    object-fit: cover;
+  }
+  

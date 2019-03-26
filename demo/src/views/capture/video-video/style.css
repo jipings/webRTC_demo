@@ -1,0 +1,16 @@
+video {
+    margin: 0 10px 0 0;
+    width: calc(50% - 7px);
+  }
+  
+  video:last-of-type {
+    margin-right: 0;
+  }
+  
+  @media screen and (max-width: 400px) {
+    video {
+      margin: 0 5px 20px 0;
+      width: calc(50% - 5px);
+    }
+  }
+  
