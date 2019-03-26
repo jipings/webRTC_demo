@@ -18,4 +18,8 @@ AudioContext 可以是事件源（event target），所以也实现了EventTarge
 ## createScriptProcessor
 创建一个可以通过JavaScript直接处理音频的ScriptProcessorNode.
 
-## RTCPeerConnection
+## [RTCPeerConnection](https://developer.mozilla.org/zh-CN/docs/Web/API/RTCPeerConnection)
+
+## getTracks() addTrack()
+
+## setLocalDescription 为什么 offer 和 answer 都要设置 setLocalDescription ？

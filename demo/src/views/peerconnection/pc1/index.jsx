@@ -49,9 +49,9 @@ export default class BasicPeer extends Component {
         // callButton.disabled = true;
         // hangupButton.disabled = false;
         console.log('Starting call');
-        this.startTime = window.performance.now();
-        const videoTracks = this.localStream.getVideoTracks();
-        const audioTracks = this.localStream.getAudioTracks();
+        this.startTime = window.performance.now(); // 返回一个精确到毫秒的  DOMHighResTimeStamp
+        const videoTracks = this.localStream.getVideoTracks(); // MediaStreamTrack列表
+        const audioTracks = this.localStream.getAudioTracks(); // 返回流中kind属性为"audio"的MediaStreamTrack列表
         if (videoTracks.length > 0) {
           console.log(`Using video device: ${videoTracks[0].label}`);
         }
@@ -60,23 +60,33 @@ export default class BasicPeer extends Component {
         }
         const configuration = this.state.selectValue === 'default' ? {} : {sdpSemantics: this.state.selectValue};
         console.log('RTCPeerConnection configuration:', configuration);
-        this.pc1 = new RTCPeerConnection(configuration);
+
+        this.pc1 = new RTCPeerConnection(configuration); 
+        // 接口代表一个由本地计算机到远端的WebRTC连接。该接口提供了创建，保持，监控，关闭连接的方法的实现
         console.log('Created local peer connection object pc1');
         this.pc1.addEventListener('icecandidate', e => this.onIceCandidate(this.pc1, e));
+        // 是收到 icecandidate 事件时调用的事件处理器.。当一个 RTCICECandidate 对象被添加时，这个事件被触发。
+
         this.pc2 = new RTCPeerConnection(configuration);
         console.log('Created remote peer connection object pc2');
         this.pc2.addEventListener('icecandidate', e => this.onIceCandidate(this.pc2, e));
+
         this.pc1.addEventListener('iceconnectionstatechange', e => this.onIceStateChange(this.pc1, e));
         this.pc2.addEventListener('iceconnectionstatechange', e => this.onIceStateChange(this.pc2, e));
+        // 是收到iceconnectionstatechange事件时调用的事件处理器 。 当iceConnectionState 改变时，这个事件被触发。
+
         this.pc2.addEventListener('track', this.gotRemoteStream);
-      
+        // 将ontrack设置为你提供的一个输入RTCTrackEvent对象用于描述新的track将如何使用的方法。这一信息包含了代表新track的MediaStreamTrack对象、
+        // RTCRtpReceiver对象、RTCRtpTransceiver对象以及一个MediaStream对象列表，该对象列表表示该track是那个媒体流的一部分。
         this.localStream.getTracks().forEach(track => this.pc1.addTrack(track, this.localStream));
+        // The RTCPeerConnection method addTrack() adds a new media track to the set of tracks which will be transmitted to the other peer.
+        //  Adding a track to a connection triggers renegotiation by firing an negotiationneeded event.
         console.log('Added local stream to pc1');
       
         try {
           console.log('pc1 createOffer start');
-          const offer = await this.pc1.createOffer(this.offerOptions);
-          await this.onCreateOfferSuccess(offer);
+          const offer = await this.pc1.createOffer(this.offerOptions); 
+          await this.onCreateOfferSuccess(offer); // 创建offer成功，等待answer
         } catch (e) {
           this.onCreateSessionDescriptionError(e);
         }
@@ -111,7 +121,7 @@ export default class BasicPeer extends Component {
         // accept the incoming offer of audio and video.
         try {
           const answer = await this.pc2.createAnswer();
-          await this.onCreateAnswerSuccess(answer);
+          await this.onCreateAnswerSuccess(answer); // Answer成功，连接完成
         } catch (e) {
           this.onCreateSessionDescriptionError(e);
         }
@@ -162,6 +172,8 @@ export default class BasicPeer extends Component {
         return (pc === this.pc1) ? 'pc1' : 'pc2';
     }
     onIceCandidate = async(pc, event) =>{
+      // 除了被添加到远端描述之外，只要约束条件"IceTransports" 没有被设置为null，连接检测结果会被发送给新的candidates。
+      // 如果这个方法影响了已经建立的连接，那么它可能导致ICE代理状态的改变以及媒体状态的改变。
         try {
             await (this.getOtherPc(pc).addIceCandidate(event.candidate));
             this.onAddIceCandidateSuccess(pc);
