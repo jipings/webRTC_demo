@@ -9,8 +9,6 @@ export default class ToCanvas extends Component {
     componentDidMount() {
 
         const video = document.querySelector('video');
-
-
         function handleSuccess(stream) {
         window.stream = stream; // make stream available to browser console
         video.srcObject = stream;
