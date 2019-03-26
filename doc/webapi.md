@@ -11,4 +11,9 @@ Blob 对象表示一个不可变、原始数据的类文件对象。Blob 表示�
 
 ## [MediaRecorder](https://developer.mozilla.org/zh-CN/docs/Web/API/MediaRecorder)
 
-## SoundMeter
+## [AudioContext](https://developer.mozilla.org/zh-CN/docs/Web/API/AudioContext)
+AudioContext接口表示由音频模块连接而成的音频处理图，每个模块对应一个AudioNode。AudioContext可以控制它所包含的节点的创建，以及音频处理、解码操作的执行。做任何事情之前都要先创建AudioContext对象，因为一切都发生在这个环境之中。
+
+AudioContext 可以是事件源（event target），所以也实现了EventTarget 接口。
+## createScriptProcessor
+创建一个可以通过JavaScript直接处理音频的ScriptProcessorNode.

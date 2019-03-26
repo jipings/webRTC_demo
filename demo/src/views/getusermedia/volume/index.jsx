@@ -8,13 +8,6 @@ export default class Volume extends Component {
         clipValue: 0,
     }
     componentDidMount() {
-        const instantMeter = document.querySelector('#instant meter');
-        const slowMeter = document.querySelector('#slow meter');
-        const clipMeter = document.querySelector('#clip meter');
-
-        const instantValueDisplay = document.querySelector('#instant .value');
-        const slowValueDisplay = document.querySelector('#slow .value');
-        const clipValueDisplay = document.querySelector('#clip .value');
 
         try {
             window.AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -29,34 +22,33 @@ export default class Volume extends Component {
             video: false
         };
 
-        function handleSuccess(stream) {
+        navigator.mediaDevices.getUserMedia(constraints).then(this.handleSuccess).catch(this.handleError);
+    }
+    handleError = (error) => {
+        console.log('navigator.MediaDevices.getUserMedia error: ', error.message, error.name);
+    }
+    handleSuccess = (stream) =>{
         // Put variables in global scope to make them available to the
         // browser console.
         window.stream = stream;
+        const self = this;
         const soundMeter = window.soundMeter = new SoundMeter(window.audioContext);
         soundMeter.connectToSource(stream, function(e) {
             if (e) {
-            alert(e);
-            return;
+                alert(e);
+                return;
             }
             setInterval(() => {
                 console.log(soundMeter.instant, soundMeter.slow, soundMeter.clip);
-                instantMeter.value = instantValueDisplay.innerText = soundMeter.instant.toFixed(2);
-                slowMeter.value = slowValueDisplay.innerText = soundMeter.slow.toFixed(2);
-                clipMeter.value = clipValueDisplay.innerText = soundMeter.clip;
+                self.setState({ instantValue: soundMeter.instant, slowValue: soundMeter.slow, clipValue: soundMeter.clip });   
             }, 200);
         });
         }
 
-        function handleError(error) {
-            console.log('navigator.MediaDevices.getUserMedia error: ', error.message, error.name);
-        }
-
-        navigator.mediaDevices.getUserMedia(constraints).then(handleSuccess).catch(handleError);
-
-    }
-
     render() {
+        const { instantValue,
+            slowValue,
+            clipValue, } = this.state;
         return (<div id="container">
 
         <h1><a href="//webrtc.github.io/samples/" title="WebRTC samples homepage">WebRTC samples</a> <span>Audio stream volume</span>
@@ -66,17 +58,17 @@ export default class Volume extends Component {
         <div id="meters">
             <div id="instant">
                 <div className="label">Instant:</div>
-                <meter high="0.25" max="1" value="0"></meter>
+                <meter high="0.25" max="1" value={instantValue}></meter>
                 <div className="value"></div>
             </div>
             <div id="slow">
                 <div className="label">Slow:</div>
-                <meter high="0.25" max="1" value="0"></meter>
+                <meter high="0.25" max="1" value={slowValue}></meter>
                 <div className="value"></div>
             </div>
             <div id="clip">
                 <div className="label">Clip:</div>
-                <meter max="1" value="0"></meter>
+                <meter max="1" value={clipValue}></meter>
                 <div className="value"></div>
             </div>
         </div>
