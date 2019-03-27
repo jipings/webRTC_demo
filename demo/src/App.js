@@ -12,6 +12,7 @@ import VideoContenthint from './views/capture/video-contenthint';
 
 import Basic from './views/peerconnection/pc1';
 import Aduio2Peer from './views/peerconnection/audio';
+import Upgrade from './views/peerconnection/upgrade';
 
 class App extends Component {
   render() {
@@ -19,6 +20,7 @@ class App extends Component {
       <div className="App">
       <HashRouter>
         <Switch>
+          <Route exact path="/peerconnection/upgrade" render={() => <Upgrade />} />
           <Route exact path="/peerconnection/audio" render={() => <Aduio2Peer />} />
           <Route exact path="/capture/video-contenthint" render={() => <VideoContenthint />} />
           <Route exact path="/peerconnection/basic" render={() => <Basic />} />
