@@ -20,6 +20,8 @@ AudioContext 可以是事件源（event target），所以也实现了EventTarge
 
 ## [RTCPeerConnection](https://developer.mozilla.org/zh-CN/docs/Web/API/RTCPeerConnection)
 
+## [captureStream](https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLCanvasElement/%E6%8D%95%E8%8E%B7%E6%B5%81)
+
 ## getTracks() addTrack()
 
 ## setLocalDescription
@@ -41,6 +43,25 @@ AudioContext 可以是事件源（event target），所以也实现了EventTarge
 7)  乙通过PC所提供的`setLocalDescription()`方法，将乙的`SDP`描述符交给乙的PC实例
 8)  乙将`answer`信令通过服务器发送给甲
 9)  甲接收到乙的`answer`信令后，将其中乙的SDP描述符提取出来，调用`setRemoteDescripttion()`方法交给甲自己的PC实例
+
+## 通过ICE框架建立NAT/防火墙穿透的连接
+webRTC使用ICE框架来获得这个外界可以直接访问的地址，`RTCPeerConnection`在创建的时候可以将ICE服务器的地址传递进去，
+```js
+    var iceServer = {
+        "iceServers": [{
+            "url": "stun:stun.l.google.com:19302"
+        }]
+    };
+    var pc = new RTCPeerConnection(iceServer);
+```
+1)  甲乙各创建配置ICE服务器的PC实例，并为其添加`onicecandidate`事件回调
+2)  当网络候选可用时，将会调用`onicecandidate`函数
+3)  在回调函数内部，甲或乙将网络候选的消息封装在`ICE Candidate`信令中，通过服务器中转，传递给对方
+4)  甲或乙接受到对方通过服务器中转所发送过来`ICE Candidate`信令时，将其解析并获得网络候选，将其通过PC实例的`addIceCandidate()`方法加入到PC实例中
+
+这样连接就创立完成了，可以向RTCPeerConnection中通过addStream()加入流来传输媒体流数据。
+
+
 
 ## STUN服务器
 STUN，Session Traversal Utilities for NAT,称为NAT会话遍历实用工具服务器。简单地说，就是获取内网设备的最外层NAT(公共ip地址)信息。

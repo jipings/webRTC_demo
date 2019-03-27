@@ -9,6 +9,7 @@ import Audio from './views/getusermedia/audio';
 import Volume from './views/getusermedia/volume';
 import Video2video from './views/capture/video-video';
 import Basic from './views/peerconnection/pc1';
+import VideoContenthint from './views/capture/video-contenthint';
 
 class App extends Component {
   render() {
@@ -16,6 +17,7 @@ class App extends Component {
       <div className="App">
       <HashRouter>
         <Switch>
+          <Route exact path="/capture/video-contenthint" render={() => <VideoContenthint />} />
           <Route exact path="/peerconnection/basic" render={() => <Basic />} />
           <Route exact path="/capture/video-video" render={() => <Video2video />} />
           <Route exact path="/getusermedia/volume" render={() => <Volume />} />
