@@ -26,6 +26,12 @@ AudioContext 可以是事件源（event target），所以也实现了EventTarge
 
 ## setLocalDescription
 
+## getSenders
+
+## [sdp](https://www.3cx.com/global/cn/voip-sip-webrtc/sdp/)
+
+## sip
+
 ## 如何使用WebRTC建立会话
 1)  获取本地媒体流(getUserMedia(), MediaStream API)
 2)  在浏览器和对等端(其它浏览器或终端)之间建立对等连接(RTCPeerConnection API)

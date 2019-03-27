@@ -8,8 +8,10 @@ import Record from './views/getusermedia/record';
 import Audio from './views/getusermedia/audio';
 import Volume from './views/getusermedia/volume';
 import Video2video from './views/capture/video-video';
-import Basic from './views/peerconnection/pc1';
 import VideoContenthint from './views/capture/video-contenthint';
+
+import Basic from './views/peerconnection/pc1';
+import Aduio2Peer from './views/peerconnection/audio';
 
 class App extends Component {
   render() {
@@ -17,6 +19,7 @@ class App extends Component {
       <div className="App">
       <HashRouter>
         <Switch>
+          <Route exact path="/peerconnection/audio" render={() => <Aduio2Peer />} />
           <Route exact path="/capture/video-contenthint" render={() => <VideoContenthint />} />
           <Route exact path="/peerconnection/basic" render={() => <Basic />} />
           <Route exact path="/capture/video-video" render={() => <Video2video />} />
