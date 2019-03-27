@@ -86,7 +86,7 @@ export default class BasicPeer extends Component {
         try {
           console.log('pc1 createOffer start');
           const offer = await this.pc1.createOffer(this.offerOptions); 
-          await this.onCreateOfferSuccess(offer); // 创建offer成功，等待answer
+          await this.onCreateOfferSuccess(offer); // 创建offer成功，交换会话描述, 等待answer
         } catch (e) {
           this.onCreateSessionDescriptionError(e);
         }
@@ -121,7 +121,7 @@ export default class BasicPeer extends Component {
         // accept the incoming offer of audio and video.
         try {
           const answer = await this.pc2.createAnswer();
-          await this.onCreateAnswerSuccess(answer); // Answer成功，连接完成
+          await this.onCreateAnswerSuccess(answer); // Answer成功，交换会话描述, 连接完成
         } catch (e) {
           this.onCreateSessionDescriptionError(e);
         }

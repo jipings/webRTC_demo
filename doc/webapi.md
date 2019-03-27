@@ -22,4 +22,39 @@ AudioContext 可以是事件源（event target），所以也实现了EventTarge
 
 ## getTracks() addTrack()
 
-## setLocalDescription 为什么 offer 和 answer 都要设置 setLocalDescription ？
+## setLocalDescription
+
+## 如何使用WebRTC建立会话
+1)  获取本地媒体流(getUserMedia(), MediaStream API)
+2)  在浏览器和对等端(其它浏览器或终端)之间建立对等连接(RTCPeerConnection API)
+3)  将媒体和数据通道关联至该连接
+4)  交换会话描述(RTCSessionDescription)
+
+## 通过offer和answer交换SDP描述符：
+
+1)  甲和乙各自建立一个PC实例
+2)  甲通过PC所提供的`createOffer()`方法建立一个包含甲的SDP描述符的offer信令
+3)  甲通过PC所提供的`setLocalDescription()`方法，将甲的SDP描述符交给甲的PC实例
+4)  甲将`offer`信令通过服务器发送给乙
+5)  乙将甲的`offer`信令中所包含的的`SDP`描述符提取出来，通过PC所提供的`setRemoteDescription()`方法交给乙的PC实例
+6)  乙通过PC所提供的`createAnswer()`方法建立一个包含乙的`SDP`描述符`answer`信令
+7)  乙通过PC所提供的`setLocalDescription()`方法，将乙的`SDP`描述符交给乙的PC实例
+8)  乙将`answer`信令通过服务器发送给甲
+9)  甲接收到乙的`answer`信令后，将其中乙的SDP描述符提取出来，调用`setRemoteDescripttion()`方法交给甲自己的PC实例
+
+## STUN服务器
+STUN，Session Traversal Utilities for NAT,称为NAT会话遍历实用工具服务器。简单地说，就是获取内网设备的最外层NAT(公共ip地址)信息。
+## TURN服务器
+TURN，Traversal Using Relay around NAT，称为中继型NAT遍历服务器
+
+媒体中继地址是一个公共地址，用于转发接收到的包，或者将收到的数据包转发给浏览器。如果两个对等端因为NAT类型等原因不能直接建立P2P连接的话，那么可以使用中继地址。
+
+ps：相比较直接使用web服务器提供媒体中继理想点。
+
+## 数据通道
+RTCDataChannel，数据通道是浏览器之间建立的非媒体的交互连接。即不传递媒体消息，绕过服务器直接传递数据。相比WebSocket，http消息，数据通道支持流量大、延迟低。
+
+单个对等连接中的多个数据通道底层共享一个流，所以只需一次offer、answer即可建立首个数据通道。之后再建立数据通道无需再次进行offer、answer交换。
+
+典型应用：游戏实时状态更新。
+
