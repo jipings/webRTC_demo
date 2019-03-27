@@ -85,3 +85,4 @@ RTCDataChannel，数据通道是浏览器之间建立的非媒体的交互连接
 
 典型应用：游戏实时状态更新。
 
+## RTCDataChannel

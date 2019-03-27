@@ -14,12 +14,15 @@ import Basic from './views/peerconnection/pc1';
 import Aduio2Peer from './views/peerconnection/audio';
 import Upgrade from './views/peerconnection/upgrade';
 
+import ChannelBasic from './views/datachannel/basic';
+
 class App extends Component {
   render() {
     return (
       <div className="App">
       <HashRouter>
         <Switch>
+          <Route exact path="/datachannel/basic" render={() => <ChannelBasic />} />
           <Route exact path="/peerconnection/upgrade" render={() => <Upgrade />} />
           <Route exact path="/peerconnection/audio" render={() => <Aduio2Peer />} />
           <Route exact path="/capture/video-contenthint" render={() => <VideoContenthint />} />
