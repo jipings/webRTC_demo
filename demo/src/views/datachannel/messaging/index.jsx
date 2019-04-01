@@ -29,6 +29,7 @@ export default class Messaging extends Component {
           const dataChannelParams = {ordered: true};
             // 本地RTC
           window.localConnection = this._localConnection = new RTCPeerConnection();
+          // 交换sdp后触发 icecandidate
           this._localConnection.addEventListener('icecandidate', async e => {
             console.log('local connection ICE candidate: ', e.candidate);
             await this._remoteConnection.addIceCandidate(e.candidate);
@@ -80,46 +81,46 @@ export default class Messaging extends Component {
         }
     }
 
-      _sendMessage = (input, channel) => {
-        const value = this.state[input];
-        if (value === '') {
-          console.log('Not sending empty message!');
-          return;
-        }
-        console.log('Sending remote message: ', value);
-        channel.send(value);
-        this.setState({[input]: '' })
+    _sendMessage = (input, channel) => {
+      const value = this.state[input];
+      if (value === '') {
+        console.log('Not sending empty message!');
+        return;
       }
-    
-      _onLocalMessageReceived = (event) => {
-        console.log(`Remote message received by local: ${event.data}`);
-        let { localMessages, allMessages } = this.state;
-        this.setState({
-            localMessages: localMessages += event.data + '\n',
-            allMessages: allMessages += 'Remote: '+event.data + '\n',
+      console.log('Sending remote message: ', value);
+      channel.send(value);
+      this.setState({[input]: '' })
+    }
+  
+    _onLocalMessageReceived = (event) => {
+      console.log(`Remote message received by local: ${event.data}`);
+      let { localMessages, allMessages } = this.state;
+      this.setState({
+          localMessages: localMessages += event.data + '\n',
+          allMessages: allMessages += 'Remote: '+event.data + '\n',
+      })
+    }
+  
+    _onRemoteDataChannel = (event) => {
+      console.log(`onRemoteDataChannel: ${JSON.stringify(event)}`);
+      window.remoteChannel = this._remoteChannel = event.channel;
+      this._remoteChannel.binaryType = 'arraybuffer';
+      this._remoteChannel.addEventListener('message', this._onRemoteMessageReceived);
+      this._remoteChannel.addEventListener('close', () => {
+        console.log('Remote channel closed!');
+        this.setState({ connected: false });
+      //   this.connected = false;
+      });
+    }
+  
+    _onRemoteMessageReceived = (event) => {
+      console.log(`Local message received by remote: ${event.data}`);
+      let { remoteMessages, allMessages } = this.state;
+      this.setState({ 
+          remoteMessages: remoteMessages += event.data + '\n',
+          allMessages: allMessages +=  'Local: '+event.data + '\n'
         })
-      }
-    
-      _onRemoteDataChannel = (event) => {
-        console.log(`onRemoteDataChannel: ${JSON.stringify(event)}`);
-        window.remoteChannel = this._remoteChannel = event.channel;
-        this._remoteChannel.binaryType = 'arraybuffer';
-        this._remoteChannel.addEventListener('message', this._onRemoteMessageReceived);
-        this._remoteChannel.addEventListener('close', () => {
-          console.log('Remote channel closed!');
-          this.setState({ connected: false });
-        //   this.connected = false;
-        });
-      }
-    
-      _onRemoteMessageReceived = (event) => {
-        console.log(`Local message received by remote: ${event.data}`);
-        let { remoteMessages, allMessages } = this.state;
-        this.setState({ 
-            remoteMessages: remoteMessages += event.data + '\n',
-            allMessages: allMessages +=  'Local: '+event.data + '\n'
-         })
-      }
+    }
 
 
     render() {

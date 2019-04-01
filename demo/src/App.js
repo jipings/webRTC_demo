@@ -16,12 +16,14 @@ import Upgrade from './views/peerconnection/upgrade';
 
 import ChannelBasic from './views/datachannel/basic';
 import Messaging from './views/datachannel/messaging';
+import SocketRTC from './views/socketRTC';
 class App extends Component {
   render() {
     return (
       <div className="App">
       <HashRouter>
         <Switch>
+          <Route exact path="/rtc/socket/:id/:userId" render={(props) => <SocketRTC {...props} />} />
           <Route exact path="/datachannel/messaging" render={() => <Messaging />} />
           <Route exact path="/datachannel/basic" render={() => <ChannelBasic />} />
           <Route exact path="/peerconnection/upgrade" render={() => <Upgrade />} />
