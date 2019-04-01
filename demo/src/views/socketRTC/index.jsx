@@ -14,20 +14,70 @@ export default class SocketRTC extends Component {
 
         this.connection = null;
         this.channel = null;
+        this.socket = null;
     }
 
 
     componentDidMount() {
-        const socket = io.connect('https://localhost:9001');
-        console.log(socket, this.props);
-        socket.on('rtc-message', (res) => {
+        this.socket = io.connect('https://localhost:9001');
+        console.log(this.socket,);
+        this.createConnection();
+
+        this.socket.on('rtc-message', (res) => {
             console.log(res, 'custom-message');
             if(res.roomId && res.users && res.users.length > 1) {
                 // TODO 建立连接
+                // TODO createOffer or createAnswer
+                if(this.userId === res.users[0]) { // 第一个用户createOffer
+                    this.connection.createOffer().then(
+                        this.gotOfferDesc,
+                        (error) => {console.log('Failed to create session description: ' + error.toString());},
+                    );
+                } else {
+                    // 必须接受到offer才能answer
+                    // this.connection.createAnswer().then(
+                    //     this.gotDescription
+                    // );
+                }
             }
         });
 
-        socket.emit('rtc-message', {roomId: this.roomId, user: this.userId});
+        this.socket.on('rtc-message-desc', (res) => {
+            console.log(res, 'rtc-message-desc');
+            
+            if(res.type === 'Offer' && res.fromUser !== this.userId) {
+                this.connection.setRemoteDescription(res.desc).then(res => {
+                    // console.log(res, 'setRemoteDescription');
+                    this.connection.createAnswer().then(
+                        this.gotAnswerDesc,
+                        (error) => {console.log('Failed to create session description: ' + error.toString());},
+                    )
+                })                
+
+            } else if(res.type === 'Answer' && res.fromUser !== this.userId) {
+                this.connection.setRemoteDescription(res.desc);
+
+                // this.connection.createAnswer().then(
+                //     this.gotAnswerDesc,
+                //     (error) => {console.log('Failed to create session description: ' + error.toString());},
+                // )
+            }
+        });
+
+        this.socket.on('rtc-message-ice', (res) => {
+            console.log(res, 'rtc-message-ice');
+            if(res.userId !== this.userId) {
+                this.socket.off('rtc-message-ice');
+                this.connection.addIceCandidate(res.candidate) // 有可用ice 添加ice到当前pc
+                    .then(
+                        () => console.log('AddIceCandidate success.'),
+                        err =>  console.log(`Failed to add Ice Candidate: ${err.toString()}`)
+                    );
+                console.log(`ICE candidate: ${res.candidate ? res.candidate.candidate : '(null)'}`);
+            }
+        })
+
+        this.socket.emit('rtc-message', {roomId: this.roomId, user: this.userId});
 
     }
 
@@ -38,8 +88,9 @@ export default class SocketRTC extends Component {
         this.channel = this.connection.createDataChannel('sendDataChannel');
         // ice 
         this.connection.onicecandidate = e => {
+            console.log(e, 'onicecandidate');
             // TODO 建立ice连接
-            // this.onIceCandidate(this.connection, e);
+            this.onIceCandidate(this.connection, e);
         }
 
         this.channel.onopen = () => {console.log('Send channel state is: ' + this.channel.readyState)};
@@ -51,22 +102,14 @@ export default class SocketRTC extends Component {
             event.channel.onmessage = (e) => { console.log('Received Message',e); };
             // this.receiveChannel.onopen = this.onReceiveChannelStateChange;
             // this.receiveChannel.onclose = this.onReceiveChannelStateChange;
-        }
-        // TODO createOffer or createAnswer
-        this.connection.createOffer().then(
-            this.gotOfferDesc,
-            (error) => {console.log('Failed to create session description: ' + error.toString());},
-        );
-
-        this.connection.createAnswer().then(
-            this.gotDescription
-        )
+        } 
     }
 
     gotOfferDesc = (desc) => {
         this.connection.setLocalDescription(desc);
         console.log(`Offer from localConnection\n${desc.sdp}`);
         // todo 将sdp发给其他id设置sdp
+        this.socket.emit('rtc-message-desc', { desc, type: 'Offer', fromUser: this.userId});
         // this.remoteConnection.setRemoteDescription(desc);
         // this.remoteConnection.createAnswer().then(
         //     this.gotDescription2,
@@ -75,18 +118,17 @@ export default class SocketRTC extends Component {
     }
 
     gotAnswerDesc = (desc) => {
-        this.connection.setRemoteDescription(desc);
-
+        this.connection.setLocalDescription(desc);
+        this.socket.emit('rtc-message-desc', { desc, type: 'Answer', fromUser: this.userId});
     }
 
     onIceCandidate = (pc, event) => {
-        this.getOtherPc(pc) 
-          .addIceCandidate(event.candidate) // 有可用ice 添加ice到当前pc
-          .then(
-            () => console.log('AddIceCandidate success.'),
-            err =>  console.log(`Failed to add Ice Candidate: ${err.toString()}`)
-          );
-        console.log(`${this.getName(pc)} ICE candidate: ${event.candidate ? event.candidate.candidate : '(null)'}`);
+
+        this.socket.emit('rtc-message-ice', { userId: this.userId, candidate:  event.candidate});
+        
+    }
+    sendChannelMsg = () => {
+        this.channel.send('channel success');
     }
     render() {
         const { dataChannelSendVal } = this.state;
@@ -95,7 +137,7 @@ export default class SocketRTC extends Component {
         <div className="socket-rtc">
             <div id="sendReceive">
                 <div id="send">
-                    <h2>Send</h2>
+                    <h2 onClick={this.sendChannelMsg}>Send</h2>
                     <textarea id="dataChannelSend"
                         value={dataChannelSendVal}
                         onChange={e => {this.setState({ dataChannelSendVal: e.target.value })}}
