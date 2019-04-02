@@ -16,13 +16,18 @@ import Upgrade from './views/peerconnection/upgrade';
 
 import ChannelBasic from './views/datachannel/basic';
 import Messaging from './views/datachannel/messaging';
-import SocketRTC from './views/socketRTC';
+import SocketRTC from './views/socketRTC'; // msg socket
+import SocketVideo from './views/socketRTC/socketVideo';
+import VideoBroad from './views/socketRTC/videoBroad';
+
 class App extends Component {
   render() {
     return (
       <div className="App">
       <HashRouter>
         <Switch>
+          <Route exact path="/rtc/socket/VideoBroad/:roomId/:userId" render={ (props) => <VideoBroad {...props} />} />
+          <Route exact path="/rtc/socket/video/:id/:userId" render={(props) => <SocketVideo {...props} />} />
           <Route exact path="/rtc/socket/:id/:userId" render={(props) => <SocketRTC {...props} />} />
           <Route exact path="/datachannel/messaging" render={() => <Messaging />} />
           <Route exact path="/datachannel/basic" render={() => <ChannelBasic />} />

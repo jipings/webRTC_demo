@@ -139,9 +139,7 @@ export default class SocketRTC extends Component {
     }
 
     onIceCandidate = (pc, event) => {
-
         this.socket.emit('rtc-message-ice', { userId: this.userId, candidate:  event.candidate});
-        
     }
     sendChannelMsg = () => {
         const { dataChannelSendVal, allMsg } = this.state;
