@@ -8,6 +8,7 @@ export default class SocketRTC extends Component {
         super(props);
         this.state = {
             dataChannelSendVal: '',
+            allMsg: [],
         }
         this.roomId = this.props.match.params.id;
         this.userId = this.props.match.params.userId;
@@ -15,6 +16,7 @@ export default class SocketRTC extends Component {
         this.connection = null;
         this.channel = null;
         this.socket = null;
+        this.userList = [];
     }
 
 
@@ -27,6 +29,7 @@ export default class SocketRTC extends Component {
             console.log(res, 'custom-message');
             if(res.roomId && res.users && res.users.length > 1) {
                 // TODO 建立连接
+                this.userList = res.users;
                 // TODO createOffer or createAnswer
                 if(this.userId === res.users[0]) { // 第一个用户createOffer
                     this.connection.createOffer().then(
@@ -99,7 +102,20 @@ export default class SocketRTC extends Component {
         this.connection.ondatachannel = (event) => {
             console.log('Receive Channel Callback');
             // this.receiveChannel = event.channel;
-            event.channel.onmessage = (e) => { console.log('Received Message',e); };
+            event.channel.onmessage = (e) => {
+                // 暂时支持2人
+                const { data } = e;
+                let otherOne = null;
+                this.userList.forEach((x) => {
+                    if(x !== this.userId) {
+                        otherOne= x
+                    }
+                });
+                const { allMsg } = this.state;
+                this.setState({ allMsg: [...allMsg, {userId: otherOne, msg: data}] });
+
+                console.log('Received Message', e.data);
+            };
             // this.receiveChannel.onopen = this.onReceiveChannelStateChange;
             // this.receiveChannel.onclose = this.onReceiveChannelStateChange;
         } 
@@ -128,10 +144,20 @@ export default class SocketRTC extends Component {
         
     }
     sendChannelMsg = () => {
-        this.channel.send('channel success');
+        const { dataChannelSendVal, allMsg } = this.state;
+        if(dataChannelSendVal) {
+            this.channel.send(dataChannelSendVal);
+            this.setState({ dataChannelSendVal: '', allMsg: [...allMsg, {userId: this.userId, msg: dataChannelSendVal}] })
+        }
+        
     }
     render() {
-        const { dataChannelSendVal } = this.state;
+        const { dataChannelSendVal, allMsg } = this.state;
+        let allMsgStr = '';
+
+        // allMsg.forEach(x => {
+        //     allMsgStr += `${x.userId}: ${x.msg} \n`;
+        // })
 
         return (
         <div className="socket-rtc">
@@ -144,7 +170,9 @@ export default class SocketRTC extends Component {
                         placeholder="Press Start, enter some text, then press Send."
                     />
                 </div>
+                
             </div>
+            <div> { allMsg.map(x => <div key={Math.random()}>{x.userId}:{x.msg}</div>) } </div>
         </div>)
     }
 }
