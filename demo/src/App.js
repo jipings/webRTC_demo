@@ -20,12 +20,15 @@ import SocketRTC from './views/socketRTC'; // msg socket
 import SocketVideo from './views/socketRTC/socketVideo';
 import VideoBroad from './views/socketRTC/videoBroad';
 
+import MultiSocketBasic from './views/MultiSocket/basic';
+
 class App extends Component {
   render() {
     return (
       <div className="App">
-      <HashRouter>
+      <BrowserRouter>
         <Switch>
+          <Route exact path="/rtc/multi/basic/:roomId/:userId" render={ props => <MultiSocketBasic {...props} /> } />
           <Route exact path="/rtc/socket/VideoBroad/:roomId/:userId" render={ (props) => <VideoBroad {...props} />} />
           <Route exact path="/rtc/socket/video/:id/:userId" render={(props) => <SocketVideo {...props} />} />
           <Route exact path="/rtc/socket/:id/:userId" render={(props) => <SocketRTC {...props} />} />
@@ -44,7 +47,7 @@ class App extends Component {
           <Route exact path="/getusermedia/record" render={() => <Record />} />
           <Route exact path="/getusermedia/getdisplaymedia" render={() => <GetDisplayMedia />} />
         </Switch>
-      </HashRouter>
+      </BrowserRouter>
       </div>
     );
   }

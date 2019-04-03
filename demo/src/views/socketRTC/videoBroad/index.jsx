@@ -15,34 +15,44 @@ export default class VideoBroad extends Component {
         this.connection = null;
         this.offerOptions = {
             offerToReceiveAudio: 1,
-            offerToReceiveVideo: 1
+            offerToReceiveVideo: 1,
         };
         this.userList = [];
         this.socket = null;
+
     }
 
     componentDidMount() {
         this.video = document.querySelector('#videoBroad');
-        // this.start();
-        this.socket = io.connect('https://172.24.35.23:9001');
+
+        const servers = null;
+        this.connection = new RTCPeerConnection(servers);
+        this.connection.onicecandidate = (e) => this.onIceCandidate(this.connection, e);
+        this.socket = io.connect('http://localhost:9001');
 
         this.socket.emit('rtc-message', {roomId: this.roomId, user: this.userId});
 
         this.socket.on('rtc-message', (res) => {
             console.log(res, 'rtc-message');
+            if(res.roomId !== this.roomId) {
+                return
+            }
             if(res.roomId && res.users && res.users.length > 1) {
-                this.start(() => {
+                
+                if(this.userId === res.users[0]) {
+
                     this.userList = res.users;
-                    // createOffer
                     if(this.userId === res.users[0]) { 
                         this.connection.createOffer(this.offerOptions).then(
                             this.gotOfferDesc,
                             (error) => {console.log('Failed to create session description: ' + error.toString());},
                         )
                     };
-                });
+
+                }
+                
             } else {
-                this.createConnection();
+                this.start();
             };
         });
 
@@ -66,7 +76,7 @@ export default class VideoBroad extends Component {
         this.socket.on('rtc-message-ice', (res) => {
             console.log(res, 'rtc-message-ice');
             if(res.userId !== this.userId) {
-                this.socket.off('rtc-message-ice');
+                // this.socket.off('rtc-message-ice');
                 this.connection.addIceCandidate(res.candidate) 
                     .then(
                         () => console.log('AddIceCandidate success.'),
@@ -82,7 +92,7 @@ export default class VideoBroad extends Component {
     gotRemoteStream = (e) => {
         if(this.video.srcObject !== e.streams[0]) {
             this.video.srcObject = e.streams[0];
-            console.log('remote video got stream');
+            console.log('remote video got stream', e);
         }
     }
 
@@ -104,9 +114,6 @@ export default class VideoBroad extends Component {
 
 
     createConnection = () => {
-        const servers = null;
-        this.connection = new RTCPeerConnection(servers);
-
         this.stream && this.stream.getTracks().forEach(track => {
             console.log(track, 'track');
             this.connection.addTrack(track, this.stream);
@@ -118,7 +125,7 @@ export default class VideoBroad extends Component {
         console.log('Requesting local stream');
         try {
           const stream = await navigator.mediaDevices.getUserMedia({audio: true, video: true});
-          console.log('Received local stream');
+          console.log('Received local stream', stream);
           this.video.srcObject = stream;
           this.stream = stream;
           this.createConnection();
@@ -133,7 +140,7 @@ export default class VideoBroad extends Component {
             <div className="video_broad">
                 
                 <video id="videoBroad" playsInline autoPlay muted></video>
-                <button onClick={this.start}>Start</button>
+                {/* <button onClick={this.start}>Start</button> */}
             </div>
         )
     }

@@ -21,7 +21,7 @@ export default class SocketRTC extends Component {
 
 
     componentDidMount() {
-        this.socket = io.connect('https://localhost:9001');
+        this.socket = io.connect('http://localhost:9001');
         console.log(this.socket,);
         this.createConnection();
 
