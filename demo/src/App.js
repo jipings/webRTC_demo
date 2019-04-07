@@ -22,12 +22,15 @@ import VideoBroad from './views/socketRTC/videoBroad';
 
 import MultiSocketBasic from './views/MultiSocket/basic';
 
+import IoStream from './views/stream';
+
 class App extends Component {
   render() {
     return (
       <div className="App">
       <BrowserRouter>
         <Switch>
+          <Route exact path="/rtc/stream" render={() => <IoStream /> } />
           <Route exact path="/rtc/multi/basic/:roomId/:userId" render={ props => <MultiSocketBasic {...props} /> } />
           <Route exact path="/rtc/socket/VideoBroad/:roomId/:userId" render={ (props) => <VideoBroad {...props} />} />
           <Route exact path="/rtc/socket/video/:id/:userId" render={(props) => <SocketVideo {...props} />} />
