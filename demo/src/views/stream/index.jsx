@@ -14,20 +14,37 @@ export default class Basic extends Component {
     }
 
     componentDidMount() {
+        const filename = 'chrome.mp4';
         this.video = document.querySelector('#my-player');
         this.socket = io.connect('http://localhost:9001');
+        
+        this.socket.emit('profile-mp4', { filename });
 
-        this.socket.emit('profile-mp4');
         this.socket.on('profile-mp4', (data) => {
             console.log(data);
-            var mediaSource = new MediaSource();
+            const mediaSource = new MediaSource();
             this.video.src = URL.createObjectURL(mediaSource);
 
             mediaSource.addEventListener('sourceopen', (e) => {
                 URL.revokeObjectURL(this.video.src);
-                var mime = 'video/webm; codecs="vorbis,vp8"';
+
+                let mime = 'video/webm; codecs="vorbis,vp8"';
+                if(filename.indexOf('.mp4') > -1) {
+                    mime = 'video/mp4; codecs="avc1.4d400d,mp4a.40.2"'
+                }
                 var mediaSource = e.target;
                 var sourceBuffer = mediaSource.addSourceBuffer(mime);
+                console.log(mime)
+
+                sourceBuffer.addEventListener('updateend', (e) => {
+                    if (!sourceBuffer.updating && mediaSource.readyState === 'open') {
+                        mediaSource.endOfStream();
+                        // 在数据请求完成后，我们需要调用 endOfStream()。它会改变 MediaSource.readyState 为 ended 并且触发 sourceended 事件。
+                        this.video.play().then(function() { console.log('play') }).catch(function(err) {
+                            console.log(err)
+                        });
+                    }
+                })
 
                 sourceBuffer.appendBuffer(data.buffer);
             });
